@@ -1,4 +1,4 @@
-package org.liws.producer;
+package org.liws.kafka.clients.producer;
 
 import java.util.Properties;
 
@@ -10,21 +10,32 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.errors.RetriableException;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.liws.kafka.clients.KafkaProps;
 
 public class T1_Producer {
 
 	public static void main(String[] args) {
 		
-		Properties props = getProps();
-
-		/*Producer<String, String> producer = new KafkaProducer<>(props);*/
-		Producer<String, String> producer = new KafkaProducer<>(props, new StringSerializer(), new StringSerializer());
+		/*Producer<String, String> producer = new KafkaProducer<>(getProps());*/
+		Producer<String, String> producer = new KafkaProducer<>(getProps(), 
+				new StringSerializer(), new StringSerializer());
 		
+		String testTopic = "test-java-topic";
+		String testMsgVal = "msg test to test-java-topic";
 		// record中可以不用指定分区和key，由kafka自行确定目标分区
-		String topic = "test-java-topic";
-		String testmsg = "msg test to test-java-topic";
-		ProducerRecord<String, String> record = new ProducerRecord<>(topic, testmsg);
+		ProducerRecord<String, String> record = new ProducerRecord<>(testTopic, testMsgVal);
 		
+		sendRecord(producer, record);
+		
+		producer.close(); // 别忘了close！
+	}
+
+	/**
+	 * 三种发送消息方式
+	 * @param producer
+	 * @param record
+	 */
+	private static void sendRecord(Producer<String, String> producer, ProducerRecord<String, String> record) {
 		// 发送方式1、fire and forget ,即发送后不理会发送结果【不推荐】
 		producer.send(record);
 
@@ -51,19 +62,16 @@ public class T1_Producer {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
-		// 别忘了close！
-		producer.close();
 	}
 
 	private static Properties getProps() {
 		Properties props = new Properties();
 		// bootstrap.servers、key.serializer、value.serializer没有默认值，必须指定
-		props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "10.6.233.62:9093,10.6.233.62:9094,10.6.233.62:9095");
+		props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, KafkaProps.BOOTSTRAP_SERVERS_CONFIG);
+		/*// key.serializer、value.serializer可在Producer构造方法中指定
+		props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+		props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());*/
 		
-		/*  // 这俩属性可在Producer构造方法中指定
-		props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer");
-		props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer");*/
 		props.put(ProducerConfig.ACKS_CONFIG, "-1");
 		props.put(ProducerConfig.RETRIES_CONFIG, 3);
 		props.put(ProducerConfig.BATCH_SIZE_CONFIG, 323840);

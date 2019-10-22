@@ -1,4 +1,4 @@
-package org.liws.producer.custom.serializer;
+package org.liws.kafka.clients.custom.serialization;
 
 import java.util.Map;
 
