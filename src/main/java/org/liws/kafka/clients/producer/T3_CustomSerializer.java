@@ -19,7 +19,7 @@ public class T3_CustomSerializer {
 
 		Producer<String, User> producer = new KafkaProducer<>(getProps());
 
-		String testTopic = "test-java-topic";
+		String testTopic = "topiclws";
 		User testMsgVal = new User("zhangsan", "张三", 23);
 		ProducerRecord<String, User> record = new ProducerRecord<>(testTopic, testMsgVal);
 
